@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Alert,
   Button,
   ButtonGroup,
   Card,
@@ -49,7 +50,9 @@ class Configure extends React.Component {
     const {
             comPort,
             connected,
+            error,
             handleChange,
+            ipcRenderer,
             job,
             start,
             username,
@@ -72,6 +75,7 @@ class Configure extends React.Component {
               ? <ConnectByUrl handleChange={ handleChange }
                               comPort={ comPort }
                               connected={ connected }
+                              error={ error }
                               start={ start }
                               url={ url } />
               : <ConnectByUsernameAndJob handleChange={ handleChange }
@@ -82,7 +86,8 @@ class Configure extends React.Component {
                                          username={ username } />
           }
           <div className="text-center">
-            <a href="#" onClick={ () => this.resetSettings() }>Reset Settings & Start Over</a>
+            <a href="#" onClick={ () => this.resetSettings() }>Reset Everything</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="#" onClick={ () => ipcRenderer.send('configPorts') }>Config Ports</a>
           </div>
         </Container>
       </div>
@@ -171,9 +176,16 @@ const ConnectByUrl = (props) =>
             <Input type="text"
                    name="url"
                    id="url"
-                   placeholder="i.e. upword.ly/stanley/colombia"
                    value={ props.url }
+                   placeholder="i.e. upword.ly/stanley/colombia"
                    onChange={ e => props.handleChange(e) } />
+            {
+              !!props.error
+                ? <Alert color="warning" className="mt-2">
+                  { props.error }
+                </Alert>
+                : null
+            }
           </Col>
         </FormGroup>
         <div className="text-center">

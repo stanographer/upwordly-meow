@@ -16,19 +16,15 @@ const bufferToOps = (ops, doc) => {
     switch (ops[i]) {
       case 8:
         deletes += 1;
-        console.log('backspace');
         break;
       case 32:
         content.push(' ');
-        console.log('space');
         break;
       case 13:
         content.push('\r');
-        console.log('carriage return');
         break;
       case 10:
         content.push('\n');
-        console.log('line feed');
         break;
       default:
         content.push(String.fromCharCode(ops[i]));
@@ -38,15 +34,14 @@ const bufferToOps = (ops, doc) => {
   // Batch all the delete commands and send at the end.
   if (deletes > 0) {
     if (doc.data.length > deletes) {
-      console.log([doc.data.length - deletes, {d: deletes}]);
       return [doc.data.length - deletes, {d: deletes}];
     }
     deletes = 0;
+
     // Batch all content and send at end.
   } else if (content.length > 0) {
-    if (content.join('') === '\r\n\r\n\r\n') return null;
-    if (content.join('') === '\r\n\r\n') return null;
-    console.log([docEnd, content.join('')]);
+    if (content.join('') === '\r\n\r\n\r\n') return [docEnd, '']; // Weird close-out sequence that Eclipse sends.
+    if (content.join('') === '\r\n\r\n') return [docEnd, ''];
     return [docEnd, content.join('')];
   } else {
     return null;

@@ -25,10 +25,11 @@ module.exports = {
       console.log('Port connected at: ' + COM_PORT + '\n\n' + 'You may begin writing now.');
     });
 
+    // When the port receives data, process it, and send it.
     port.on('data', data => {
       const op = data.toJSON();
       if (op.type !== 'Buffer') return new Error('Cannot read this type of stream.');
-      doc.submitOp(bufferToOps(op.data, doc));
+      setTimeout(() => doc.submitOp(bufferToOps(op.data, doc)), 0);
     });
   }
 };

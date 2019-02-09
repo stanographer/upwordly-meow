@@ -42,8 +42,8 @@
   font-family: 'Comfortaa', sans-serif;
   font-size: 1rem;
   padding: 1rem 1rem 1rem 1rem;
-  height: 12.5rem;
-  max-height: 13rem;
+  height: 15rem;
   white-space: normal;
   word-break: break-word;
+  overflow-y: hidden;
 }

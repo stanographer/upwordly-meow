@@ -10,14 +10,18 @@ function ShareDBBinding(props) {
   useEffect(() => {
     doc.subscribe(err => {
       if (err) {
-        setText('There was a connection error: ' + err);
+        props.handleError('There was an error subscribing.');
       }
     });
 
     // Load document and bind it to local snapshot.
     doc.on('load', () => {
-      binding = new Binding(doc.data, '≈');
-      setText(binding.snapshot.slice(-300) || binding.snapshot);
+      try {
+        binding = new Binding(doc.data, '≈');
+        setText(binding.snapshot.slice(-300) || binding.snapshot || '');
+      } catch (err) {
+        props.handleError('There was an error loading.');
+      }
     });
 
     // Apply remote ops to local snapshot.

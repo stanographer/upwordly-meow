@@ -15,19 +15,21 @@ class App extends Component {
     super(props);
 
     this.state = {
+      CATSetup: false,
       comPort: 1,
       connected: false,
-      newUser: true,
-      host: 'upword.ly/ws',
-      username: '',
-      job: '',
-      url: '',
       driversInstalled: false,
+      error: '',
+      host: 'upword.ly/ws',
+      job: '',
+      newUser: true,
       portsConfigured: false,
-      CATSetup: false
+      url: '',
+      username: ''
     };
 
     this.handleChange = this.handleChange.bind(this);
+    this.handleError = this.handleError.bind(this);
     this.start = this.start.bind(this);
     this.end = this.end.bind(this);
   }
@@ -74,10 +76,22 @@ class App extends Component {
   handleChange(event) {
     // If the user types in a URL, parse it into a username and a job slug.
     if (event.target.id === 'url') {
-      this.setState({
-        username: event.target.value.split('/')[1],
-        job: event.target.value.split('/')[2]
-      });
+      try {
+        let url = event.target.value
+          .trim()
+          .toLowerCase();
+        if (url.includes('//')) url = url.split('//')[1];
+        console.log(url);
+        this.setState({
+          error: '',
+          job: url.split('/')[2],
+          username: url.split('/')[1]
+        });
+      } catch (err) {
+        this.setState({
+          error: 'This is not a valid URL.'
+        });
+      }
     } else {
       this.setState({
         [event.target.id]: event.target.value
@@ -102,7 +116,14 @@ class App extends Component {
 
   end() {
     this.setState({
-      connected: false
+      connected: false,
+      error: ''
+    });
+  }
+
+  handleError(err) {
+    this.setState({
+      error: err
     });
   }
 
@@ -111,12 +132,14 @@ class App extends Component {
             CATSetup,
             comPort,
             connected,
+            error,
             newUser,
             host,
             username,
             job,
             driversInstalled,
-            portsConfigured
+            portsConfigured,
+            url
           } = this.state;
     return (
       <>
@@ -128,25 +151,29 @@ class App extends Component {
             // After you hit that button, you're no longer new
             // but you still have to set up your stuff.
             : (!portsConfigured || !driversInstalled)
-              ? <Drivers ipcRenderer={ ipcRenderer }
+            ? <Drivers ipcRenderer={ ipcRenderer }
                        driversInstalled={ driversInstalled }
                        portsConfigured={ portsConfigured }
             />
             // Finally, take you to the connection page.
-              : !CATSetup || CATSetup === null
-                ? <ConfigCAT ipcRenderer={ ipcRenderer } CATSetup={CATSetup} />
-                : !connected
-                  ? <Configure comPort={ comPort || '' }
-                           connected={ connected || false }
-                           host={ host || '' }
-                           username={ username || '' }
-                           job={ job || '' }
-                           handleChange={ this.handleChange }
-                           ipcRenderer={ ipcRenderer }
-                           start={ this.start } />
-                  : <Connection username={ username || '' }
-                            job={ job || '' }
-                            end={ this.end } />
+            : !CATSetup || CATSetup === null
+              ? <ConfigCAT ipcRenderer={ ipcRenderer } CATSetup={ CATSetup } />
+              : !connected
+                ? <Configure comPort={ comPort || '' }
+                             connected={ connected || false }
+                             error={ error }
+                             host={ host || '' }
+                             username={ username || '' }
+                             job={ job || '' }
+                             handleChange={ this.handleChange }
+                             ipcRenderer={ ipcRenderer }
+                             start={ this.start }
+                             url={ url } />
+                : <Connection username={ username || '' }
+                              handleError={ error => this.handleError(error) }
+                              error={ error }
+                              job={ job || '' }
+                              end={ this.end } />
         }
       </>
     );
